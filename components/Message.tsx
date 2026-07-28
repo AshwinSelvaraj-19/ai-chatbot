@@ -105,12 +105,17 @@ export function Message({
           <>
             <div
               className={cn(
-                "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm text-white",
-                isUser ? "rounded-br-md" : "rounded-bl-md border border-white/10 text-slate-200"
+                "rounded-2xl px-4 py-3 text-sm leading-relaxed text-white backdrop-blur-sm transition-all duration-200",
+                isUser 
+                  ? "rounded-br-md shadow-lg" 
+                  : "rounded-bl-md border border-white/10 text-slate-200 hover:bg-white/[0.07]"
               )}
               style={
                 isUser
-                  ? { backgroundColor: `var(--color-primary)` }
+                  ? { 
+                    backgroundColor: `var(--color-primary)`,
+                    boxShadow: `0 4px 16px rgba(14, 165, 233, 0.2)`,
+                  }
                   : {
                       backgroundColor: `rgba(255, 255, 255, 0.05)`,
                     }
@@ -156,7 +161,7 @@ export function Message({
             {!isStreaming && (
               <div
                 className={cn(
-                  "flex items-center gap-1 mt-1.5 opacity-0 group-hover/msg:opacity-100 transition-opacity",
+                  "flex items-center gap-1 mt-1.5 opacity-0 group-hover/msg:opacity-100 transition-all duration-200",
                   isUser ? "justify-end" : "justify-start"
                 )}
               >
@@ -167,7 +172,7 @@ export function Message({
                       setEditing(true);
                     }}
                     aria-label="Edit message"
-                    className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-1.5 py-0.5 rounded-md hover:bg-white/5 transition-colors"
+                    className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-2 py-1 rounded-md hover:bg-white/8 transition-all duration-200 hover:scale-105 active:scale-95"
                   >
                     <Pencil className="w-3 h-3" />
                     Edit
@@ -177,7 +182,7 @@ export function Message({
                     <button
                       onClick={handleCopy}
                       aria-label="Copy response"
-                      className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-1.5 py-0.5 rounded-md hover:bg-white/5 transition-colors"
+                      className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-2 py-1 rounded-md hover:bg-white/8 transition-all duration-200 hover:scale-105 active:scale-95"
                     >
                       {copied ? (
                         <Check className="w-3 h-3 text-emerald-400" />
@@ -190,7 +195,7 @@ export function Message({
                       <button
                         onClick={() => onRegenerate(message.id)}
                         aria-label="Regenerate response"
-                        className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-1.5 py-0.5 rounded-md hover:bg-white/5 transition-colors"
+                        className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-2 py-1 rounded-md hover:bg-white/8 transition-all duration-200 hover:scale-105 active:scale-95"
                       >
                         <RefreshCw className="w-3 h-3" />
                         Regenerate

@@ -52,10 +52,11 @@ export function Sidebar({
   }, [chats, searchQuery]);
   const content = (
     <aside
-      className="relative z-20 flex flex-col backdrop-blur-3xl h-full w-[280px] max-w-[85vw]"
+      className="relative z-20 flex flex-col backdrop-blur-3xl h-full w-[280px] max-w-[85vw] border-r transition-all duration-300"
       style={{
-        backgroundColor: `rgba(var(--color-sidebar-rgb), 0.3)`,
-        borderRight: `1px solid rgba(255, 255, 255, 0.05)`,
+        backgroundColor: `rgba(var(--color-sidebar-rgb), 0.4)`,
+        borderRightColor: `rgba(255, 255, 255, 0.08)`,
+        borderRightWidth: `1px`,
       }}
     >
       <div className="p-4 flex items-center justify-between gap-3">
@@ -81,22 +82,22 @@ export function Sidebar({
         <Button
           variant="ghost"
           onClick={onNew}
-          className="w-full justify-start gap-3 bg-white/5 hover:bg-white/10 text-slate-200 border border-white/5 rounded-xl h-11"
+          className="w-full justify-start gap-3 bg-white/5 hover:bg-white/8 text-slate-200 border border-white/10 rounded-xl h-11 transition-all duration-200 active:scale-95"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" />
           <span className="text-sm font-medium">New Chat</span>
         </Button>
       </div>
 
       <div className="px-3 py-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        <div className="relative group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 transition-colors duration-200 group-focus-within:text-slate-400" />
           <input
             type="text"
             placeholder="Search chats..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-slate-200 placeholder:text-slate-600 hover:bg-white/10 focus:outline-none focus:bg-white/10 focus:border-white/20"
+            className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-slate-200 placeholder:text-slate-600 hover:bg-white/8 focus:outline-none focus:bg-white/10 focus:border-white/20 transition-all duration-200"
           />
         </div>
       </div>
@@ -111,17 +112,19 @@ export function Sidebar({
           </p>
         )}
         {filteredChats.map((chat) => (
-          <div
+          <motion.div
             key={chat.id}
             onClick={() => onSelect(chat.id)}
+            whileHover={{ x: 4 }}
+            whileTap={{ scale: 0.98 }}
             className={cn(
-              "group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer",
+              "group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer",
               chat.id === activeId
-                ? "bg-white/10 text-white"
+                ? "bg-white/10 text-white shadow-sm"
                 : "text-slate-400 hover:text-white hover:bg-white/5"
             )}
           >
-            <MessageSquare className="w-4 h-4 opacity-40 group-hover:opacity-100 flex-shrink-0" />
+            <MessageSquare className="w-4 h-4 opacity-40 group-hover:opacity-100 flex-shrink-0 transition-opacity duration-200" />
             <span className="truncate text-left text-sm flex-1">
               {chat.title || "New chat"}
             </span>
@@ -131,11 +134,11 @@ export function Sidebar({
                 onDelete(chat.id);
               }}
               aria-label="Delete chat"
-              className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 transition-opacity flex-shrink-0"
+              className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 transition-all duration-200 flex-shrink-0 hover:scale-110"
             >
               <Trash2 className="w-4 h-4" />
             </button>
-          </div>
+          </motion.div>
         ))}
       </div>
 

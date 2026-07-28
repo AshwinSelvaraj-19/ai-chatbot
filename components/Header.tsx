@@ -37,10 +37,12 @@ export function Header({
     : "U";
   return (
     <header
-      className="h-16 flex items-center justify-between px-4 md:px-6 backdrop-blur-md z-10 flex-shrink-0"
+      className="h-16 flex items-center justify-between px-4 md:px-6 backdrop-blur-xl z-10 flex-shrink-0 border-b transition-all duration-300"
       style={{
-        backgroundColor: `rgba(var(--color-background-rgb), 0.4)`,
-        borderBottom: `1px solid rgba(255, 255, 255, 0.05)`,
+        backgroundColor: `rgba(var(--color-background-rgb), 0.5)`,
+        borderBottomColor: `rgba(255, 255, 255, 0.08)`,
+        borderBottomWidth: `1px`,
+        boxShadow: `0 0.5px 0 rgba(255, 255, 255, 0.04)`,
       }}
     >
       <div className="flex items-center gap-2 min-w-0">
@@ -53,9 +55,9 @@ export function Header({
           <Menu className="w-5 h-5" />
         </Button>
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-slate-200 font-semibold outline-none transition-colors hover:bg-white/5">
+          <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-slate-200 font-semibold outline-none transition-all duration-200 hover:bg-white/5 active:scale-95">
             Phoenix 4.0
-            <ChevronDown className="w-4 h-4 opacity-50" />
+            <ChevronDown className="w-4 h-4 opacity-50 transition-transform duration-200" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="text-slate-200 min-w-48 p-1"
@@ -106,8 +108,11 @@ export function Header({
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="h-8 w-8 rounded-full border border-white/10 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs hover:opacity-80 transition-opacity cursor-pointer"
-            style={{ backgroundColor: `var(--color-primary)` }}
+            className="h-8 w-8 rounded-full border border-white/20 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs hover:border-white/30 transition-all duration-200 cursor-pointer active:scale-95"
+            style={{ 
+              backgroundColor: `var(--color-primary)`,
+              boxShadow: `0 0 0 0 rgba(14, 165, 233, 0.1)`,
+            }}
           >
             {userInitials}
           </DropdownMenuTrigger>
