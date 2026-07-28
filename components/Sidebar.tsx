@@ -1,0 +1,151 @@
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  LayoutGrid,
+  MessageSquare,
+  Plus,
+  Settings,
+  Sparkles,
+  Trash2,
+  X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { Conversation } from "@/lib/types";
+
+interface SidebarProps {
+  chats: Conversation[];
+  activeId: string | null;
+  open: boolean;
+  onToggle: () => void;
+  onSelect: (id: string) => void;
+  onNew: () => void;
+  onDelete: (id: string) => void;
+}
+
+export function Sidebar({
+  chats,
+  activeId,
+  open,
+  onToggle,
+  onSelect,
+  onNew,
+  onDelete,
+}: SidebarProps) {
+  const content = (
+    <aside className="relative z-20 flex flex-col border-r border-white/5 bg-black/30 backdrop-blur-3xl h-full w-[280px] max-w-[85vw]">
+      <div className="p-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 flex-shrink-0">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <span className="font-bold text-lg tracking-tight text-white truncate">
+            Phoenix AI
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden text-slate-300"
+          onClick={onToggle}
+        >
+          <X className="w-5 h-5" />
+        </Button>
+      </div>
+
+      <div className="px-3 py-2">
+        <Button
+          variant="ghost"
+          onClick={onNew}
+          className="w-full justify-start gap-3 bg-white/5 hover:bg-white/10 text-slate-200 border border-white/5 rounded-xl h-11"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="text-sm font-medium">New Chat</span>
+        </Button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto phoenix-scroll px-3 py-4 space-y-1">
+        <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest px-3 mb-2">
+          Recent
+        </div>
+        {chats.length === 0 && (
+          <p className="px-3 text-sm text-slate-600">No conversations yet.</p>
+        )}
+        {chats.map((chat) => (
+          <div
+            key={chat.id}
+            onClick={() => onSelect(chat.id)}
+            className={cn(
+              "group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer",
+              chat.id === activeId
+                ? "bg-white/10 text-white"
+                : "text-slate-400 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <MessageSquare className="w-4 h-4 opacity-40 group-hover:opacity-100 flex-shrink-0" />
+            <span className="truncate text-left text-sm flex-1">
+              {chat.title || "New chat"}
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(chat.id);
+              }}
+              aria-label="Delete chat"
+              className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 transition-opacity flex-shrink-0"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="p-3 border-t border-white/5 space-y-1">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-slate-400 hover:text-white rounded-lg"
+        >
+          <LayoutGrid className="w-4 h-4" />
+          <span className="text-sm">Explore GPTs</span>
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-slate-400 hover:text-white rounded-lg"
+        >
+          <Settings className="w-4 h-4" />
+          <span className="text-sm">Settings</span>
+        </Button>
+      </div>
+    </aside>
+  );
+
+  return (
+    <>
+      <div className="hidden md:block h-full flex-shrink-0">{content}</div>
+
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onToggle}
+              className="md:hidden fixed inset-0 z-30 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="md:hidden fixed top-0 left-0 z-40 h-full"
+            >
+              {content}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
