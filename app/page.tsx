@@ -84,7 +84,10 @@ export default function PhoenixPage() {
 
   if (!authChecked) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-950">
+      <div
+        className="flex h-screen items-center justify-center"
+        style={{ backgroundColor: "var(--color-background)" }}
+      >
         <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
       </div>
     );
@@ -98,10 +101,19 @@ export default function PhoenixPage() {
       : null;
 
   return (
-    <div className="flex h-screen w-full bg-slate-950 text-slate-200 overflow-hidden">
+    <div
+      className="flex h-screen w-full text-slate-200 overflow-hidden"
+      style={{ backgroundColor: "var(--color-background)" }}
+    >
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fuchsia-600/10 blur-[120px]" />
+        <div
+          className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px]"
+          style={{ backgroundColor: `rgba(var(--color-primary-rgb), 0.1)` }}
+        />
+        <div
+          className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px]"
+          style={{ backgroundColor: `rgba(var(--color-secondary-rgb), 0.1)` }}
+        />
       </div>
 
       <Sidebar

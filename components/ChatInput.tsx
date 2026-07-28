@@ -44,8 +44,21 @@ export function ChatInput({ onSend, streaming, onStop }: ChatInputProps) {
   return (
     <div className="px-4 pb-6 pt-2 flex justify-center">
       <div className="w-full max-w-3xl relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-fuchsia-500/20 rounded-[26px] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-        <div className="relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 group-focus-within:border-white/20">
+        <div
+          className="absolute -inset-1 rounded-[26px] blur-2xl opacity-0 group-focus-within:opacity-75 transition-all duration-500"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(var(--color-primary-rgb), 0.3), rgba(var(--color-secondary-rgb), 0.3))",
+          }}
+        />
+        <div
+          className="relative backdrop-blur-3xl rounded-3xl overflow-hidden transition-all duration-300 group-focus-within:shadow-2xl"
+          style={{
+            backgroundColor: `rgba(255, 255, 255, 0.07)`,
+            border: `1px solid rgba(255, 255, 255, 0.12)`,
+            boxShadow: `0 8px 32px rgba(0, 0, 0, 0.1)`,
+          }}
+        >
           <textarea
             ref={textareaRef}
             value={value}
@@ -81,7 +94,11 @@ export function ChatInput({ onSend, streaming, onStop }: ChatInputProps) {
                   onClick={onStop}
                   size="icon"
                   aria-label="Stop generating"
-                  className="h-9 w-9 rounded-full bg-white text-black hover:bg-slate-200 transition-all duration-300"
+                  className="h-9 w-9 rounded-full text-white transition-all duration-200 hover:scale-110 active:scale-95"
+                  style={{ 
+                    backgroundColor: `var(--color-button)`,
+                    boxShadow: `0 4px 12px rgba(2, 132, 199, 0.3)`,
+                  }}
                 >
                   <Square className="w-3.5 h-3.5 fill-current" />
                 </Button>
@@ -92,11 +109,21 @@ export function ChatInput({ onSend, streaming, onStop }: ChatInputProps) {
                   size="icon"
                   aria-label="Send message"
                   className={cn(
-                    "h-9 w-9 rounded-full transition-all duration-300",
-                    value.trim()
-                      ? "bg-white text-black hover:bg-slate-200 scale-100"
-                      : "bg-white/10 text-slate-500 scale-90"
+                    "h-9 w-9 rounded-full transition-all duration-300 hover:scale-110 active:scale-95",
+                    value.trim() ? "scale-100" : "scale-90 opacity-50"
                   )}
+                  style={
+                    value.trim()
+                      ? {
+                          backgroundColor: `var(--color-button)`,
+                          color: "white",
+                          boxShadow: `0 4px 12px rgba(2, 132, 199, 0.3)`,
+                        }
+                      : {
+                          backgroundColor: `rgba(255, 255, 255, 0.08)`,
+                          color: "#64748b",
+                        }
+                  }
                 >
                   <Send className="w-4 h-4" />
                 </Button>

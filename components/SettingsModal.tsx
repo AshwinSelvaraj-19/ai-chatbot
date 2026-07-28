@@ -80,9 +80,21 @@ export function SettingsModal({
         exit={{ opacity: 0, scale: 0.95 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
-        <div className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div
+          className="w-full max-w-2xl rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
+          style={{
+            backgroundColor: `rgba(var(--color-sidebar-rgb), 0.95)`,
+            border: `1px solid rgba(255, 255, 255, 0.1)`,
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-white/5 sticky top-0 bg-slate-900/95 backdrop-blur-sm">
+          <div
+            className="flex items-center justify-between p-6 sticky top-0 backdrop-blur-sm"
+            style={{
+              borderBottom: `1px solid rgba(255, 255, 255, 0.05)`,
+              backgroundColor: `rgba(var(--color-sidebar-rgb), 0.95)`,
+            }}
+          >
             <h2 className="text-xl font-bold text-white">Settings</h2>
             <button
               onClick={onClose}
@@ -101,7 +113,12 @@ export function SettingsModal({
                   Profile Information
                 </h3>
               </div>
-              <div className="space-y-3 bg-slate-800/50 p-4 rounded-lg">
+              <div
+                className="space-y-3 p-4 rounded-lg"
+                style={{
+                  backgroundColor: `rgba(var(--color-background-rgb), 0.3)`,
+                }}
+              >
                 <div>
                   <label className="text-xs text-slate-400 block mb-1">
                     Email
@@ -116,7 +133,8 @@ export function SettingsModal({
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-white/10 rounded text-sm text-slate-200"
+                    className="w-full px-3 py-2 rounded text-sm text-slate-200 border border-white/10"
+                    style={{ backgroundColor: `rgba(var(--color-background-rgb), 0.5)` }}
                   />
                 </div>
               </div>

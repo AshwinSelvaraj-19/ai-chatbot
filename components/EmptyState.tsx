@@ -31,16 +31,18 @@ export function EmptyState({ onPick }: { onPick: (text: string) => void }) {
         </h2>
         <div className="grid grid-cols-2 gap-3 mt-8">
           {SUGGESTIONS.map((s) => (
-            <button
+            <motion.button
               key={s.title}
               onClick={() => onPick(s.title)}
-              className="p-4 text-left rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
+              whileHover={{ y: -4, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="p-4 text-left rounded-2xl border border-white/8 bg-white/5 hover:bg-white/10 hover:border-white/15 transition-all duration-200 group backdrop-blur-sm"
             >
-              <p className="text-sm font-medium text-slate-300 group-hover:text-white truncate">
+              <p className="text-sm font-medium text-slate-300 group-hover:text-white truncate transition-colors">
                 {s.title}
               </p>
-              <p className="text-xs text-slate-500 mt-1">{s.subtitle}</p>
-            </button>
+              <p className="text-xs text-slate-500 mt-1 transition-colors">{s.subtitle}</p>
+            </motion.button>
           ))}
         </div>
       </motion.div>

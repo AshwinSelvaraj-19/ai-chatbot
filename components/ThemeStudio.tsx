@@ -169,9 +169,21 @@ export function ThemeStudio({ isOpen, onClose }: ThemeStudioProps) {
         exit={{ opacity: 0, scale: 0.95 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
-        <div className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div
+          className="w-full max-w-2xl rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
+          style={{
+            backgroundColor: `rgba(var(--color-sidebar-rgb), 0.95)`,
+            border: `1px solid rgba(255, 255, 255, 0.1)`,
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-white/5 sticky top-0 bg-slate-900/95 backdrop-blur-sm">
+          <div
+            className="flex items-center justify-between p-6 sticky top-0 backdrop-blur-sm"
+            style={{
+              borderBottom: `1px solid rgba(255, 255, 255, 0.05)`,
+              backgroundColor: `rgba(var(--color-sidebar-rgb), 0.95)`,
+            }}
+          >
             <h2 className="text-xl font-bold text-white">Theme Studio</h2>
             <button
               onClick={onClose}
@@ -187,7 +199,10 @@ export function ThemeStudio({ isOpen, onClose }: ThemeStudioProps) {
               <h3 className="text-sm font-semibold text-slate-300 mb-3">
                 Live Preview
               </h3>
-              <div className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-800 p-4">
+              <div
+                className="relative overflow-hidden rounded-lg border border-white/10 p-4"
+                style={{ backgroundColor: `rgba(var(--color-background-rgb), 0.5)` }}
+              >
                 <div className="space-y-2">
                   <div
                     className="h-12 rounded-lg flex items-center px-4 text-white font-medium"
@@ -247,7 +262,8 @@ export function ThemeStudio({ isOpen, onClose }: ThemeStudioProps) {
                             e.target.value
                           )
                         }
-                        className="flex-1 px-3 py-2 bg-slate-800 border border-white/10 rounded text-xs text-slate-200"
+                        className="flex-1 px-3 py-2 rounded text-xs text-slate-200 border border-white/10"
+                        style={{ backgroundColor: `rgba(var(--color-background-rgb), 0.5)` }}
                       />
                     </div>
                   </div>
@@ -265,7 +281,12 @@ export function ThemeStudio({ isOpen, onClose }: ThemeStudioProps) {
                   <button
                     key={preset.name}
                     onClick={() => handlePresetSelect(preset)}
-                    className="group relative overflow-hidden rounded-lg border border-white/10 p-3 hover:border-white/30 transition-all"
+                    className="group relative overflow-hidden rounded-lg p-3 transition-all"
+                    style={{
+                      backgroundColor: `rgba(var(--color-background-rgb), 0.3)`,
+                      borderColor: `rgba(255, 255, 255, 0.1)`,
+                      border: `1px solid rgba(255, 255, 255, 0.1)`,
+                    }}
                   >
                     <div className="flex gap-1 mb-2">
                       <div
