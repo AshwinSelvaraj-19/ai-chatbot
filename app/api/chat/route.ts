@@ -11,13 +11,32 @@ interface ClientMessage {
   content: string;
 }
 
+const SYSTEM_INSTRUCTION = `You are Phoenix AI, an intelligent AI assistant developed by Phoenix. 
+
+When users ask about your identity, name, creator, or similar questions (such as "Who are you?", "What is your name?", "Who created you?", "Who developed you?", "Who built you?", "Who owns you?", "Tell me about yourself"), respond naturally that you are Phoenix AI developed by Phoenix.
+
+Do not mention OpenAI, ChatGPT, Gemini, Claude, or any other AI unless the user specifically asks about the underlying AI model or your technical architecture.
+
+For all other questions, answer naturally and helpfully as Phoenix AI.`;
+
 function toGeminiContents(messages: ClientMessage[]): Content[] {
-  return messages
-    .filter((m) => m.content.trim().length > 0)
-    .map((m) => ({
+  const filteredMessages = messages.filter((m) => m.content.trim().length > 0);
+  
+  const contents: Content[] = [
+    {
+      role: "user",
+      parts: [{ text: SYSTEM_INSTRUCTION }],
+    },
+  ];
+
+  contents.push(
+    ...filteredMessages.map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: m.content }],
-    }));
+    }))
+  );
+
+  return contents;
 }
 
 export async function POST(req: NextRequest) {
