@@ -1,24 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import type { ChatMessage, Conversation } from "@/lib/types";
-
-const STORAGE_KEY = "phoenix-chats-v1";
 
 function uid(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-function loadChats(): Conversation[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Conversation[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
 }
 
 function toApiMessages(messages: ChatMessage[]) {
@@ -27,40 +14,94 @@ function toApiMessages(messages: ChatMessage[]) {
     .map((m) => ({ role: m.role, content: m.content }));
 }
 
-export function useChats() {
+interface DbChat {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
+interface DbMessage {
+  id: string;
+  chat_id: string;
+  role: string;
+  content: string;
+  created_at: string;
+}
+
+export function useChats(userId: string | null) {
   const [chats, setChats] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [streaming, setStreaming] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
+  const skipPersistRef = useRef(false);
 
-  // One-time hydration of chats from localStorage. SSR-safe: runs only in the browser.
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    const loaded = loadChats();
+  // Load chats + messages for the signed-in user
+  const loadChats = useCallback(async (uid: string) => {
+    setLoading(true);
+    const { data: dbChats } = await supabase
+      .from("chats")
+      .select("id, title, created_at")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false });
+
+    if (!dbChats || dbChats.length === 0) {
+      setChats([]);
+      setActiveId(null);
+      setLoading(false);
+      return;
+    }
+
+    const chatIds = dbChats.map((c: DbChat) => c.id);
+    const { data: dbMessages } = await supabase
+      .from("messages")
+      .select("id, chat_id, role, content, created_at")
+      .in("chat_id", chatIds)
+      .order("created_at", { ascending: true });
+
+    const messagesByChat = new Map<string, ChatMessage[]>();
+    for (const m of (dbMessages ?? []) as DbMessage[]) {
+      const arr = messagesByChat.get(m.chat_id) ?? [];
+      arr.push({
+        id: m.id,
+        role: m.role as "user" | "assistant",
+        content: m.content,
+        createdAt: new Date(m.created_at).getTime(),
+      });
+      messagesByChat.set(m.chat_id, arr);
+    }
+
+    const loaded: Conversation[] = dbChats.map((c: DbChat) => ({
+      id: c.id,
+      title: c.title,
+      messages: messagesByChat.get(c.id) ?? [],
+      createdAt: new Date(c.created_at).getTime(),
+      updatedAt: new Date(c.created_at).getTime(),
+    }));
+
     setChats(loaded);
     setActiveId(loaded[0]?.id ?? null);
-    setHydrated(true);
+    setLoading(false);
   }, []);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
-    } catch {
-      // ignore quota / serialization errors
-    }
-  }, [chats, hydrated]);
-
-  useEffect(() => {
-    return () => abortRef.current?.abort();
-  }, []);
+    if (!userId) return;
+    let cancelled = false;
+    (async () => {
+      await loadChats(userId);
+      if (cancelled) return;
+    })();
+    return () => {
+      cancelled = true;
+      abortRef.current?.abort();
+    };
+  }, [userId, loadChats]);
 
   const activeChat = chats.find((c) => c.id === activeId) ?? null;
 
   const newChat = useCallback(() => {
+    // Create locally only; persisted on first message (when we have a title).
     const chat: Conversation = {
       id: uid(),
       title: "New chat",
@@ -68,6 +109,7 @@ export function useChats() {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
+    skipPersistRef.current = true;
     setChats((prev) => [chat, ...prev]);
     setActiveId(chat.id);
     return chat.id;
@@ -77,30 +119,52 @@ export function useChats() {
     setActiveId(id);
   }, []);
 
-  const deleteChat = useCallback((id: string) => {
-    setChats((prev) => {
-      const next = prev.filter((c) => c.id !== id);
-      if (id === activeId) {
-        setActiveId(next[0]?.id ?? null);
-      }
-      return next;
-    });
-  }, [activeId]);
+  const deleteChat = useCallback(
+    async (id: string) => {
+      setChats((prev) => {
+        const next = prev.filter((c) => c.id !== id);
+        if (id === activeId) setActiveId(next[0]?.id ?? null);
+        return next;
+      });
+      await supabase.from("chats").delete().eq("id", id);
+    },
+    [activeId]
+  );
 
-  const updateMessage = useCallback(
-    (chatId: string, msgId: string, content: string) => {
-      setChats((prev) =>
-        prev.map((c) => {
-          if (c.id !== chatId) return c;
-          return {
-            ...c,
-            messages: c.messages.map((m) =>
-              m.id === msgId ? { ...m, content } : m
-            ),
-            updatedAt: Date.now(),
-          };
-        })
-      );
+  const persistMessage = useCallback(
+    async (chatId: string, msg: ChatMessage) => {
+      await supabase.from("messages").insert({
+        id: msg.id,
+        chat_id: chatId,
+        role: msg.role,
+        content: msg.content,
+      });
+    },
+    []
+  );
+
+  const updateMessageContent = useCallback(
+    async (msgId: string, content: string) => {
+      await supabase
+        .from("messages")
+        .update({ content })
+        .eq("id", msgId);
+    },
+    []
+  );
+
+  const deleteMessagesAfter = useCallback(
+    async (chatId: string, keepCount: number) => {
+      const { data } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("chat_id", chatId)
+        .order("created_at", { ascending: true })
+        .range(keepCount, Number.MAX_SAFE_INTEGER);
+      if (data && data.length > 0) {
+        const ids = data.map((d) => d.id);
+        await supabase.from("messages").delete().in("id", ids);
+      }
     },
     []
   );
@@ -123,36 +187,37 @@ export function useChats() {
     []
   );
 
-  const setMessages = useCallback(
-    (chatId: string, messages: ChatMessage[]) => {
+  const addMessage = useCallback(
+    (chatId: string, message: ChatMessage) => {
       setChats((prev) =>
-        prev.map((c) =>
-          c.id === chatId
-            ? { ...c, messages, updatedAt: Date.now() }
-            : c
-        )
+        prev.map((c) => {
+          if (c.id !== chatId) return c;
+          const isFirstUser =
+            c.messages.length === 0 && message.role === "user";
+          return {
+            ...c,
+            title: isFirstUser
+              ? message.content.slice(0, 42) || "New chat"
+              : c.title,
+            messages: [...c.messages, message],
+            updatedAt: Date.now(),
+          };
+        })
       );
     },
     []
   );
 
-  const addMessage = useCallback((chatId: string, message: ChatMessage) => {
-    setChats((prev) =>
-      prev.map((c) => {
-        if (c.id !== chatId) return c;
-        const isFirstUser =
-          c.messages.length === 0 && message.role === "user";
-        return {
-          ...c,
-          title: isFirstUser
-            ? message.content.slice(0, 42) || "New chat"
-            : c.title,
-          messages: [...c.messages, message],
-          updatedAt: Date.now(),
-        };
-      })
-    );
-  }, []);
+  const setMessages = useCallback(
+    (chatId: string, messages: ChatMessage[]) => {
+      setChats((prev) =>
+        prev.map((c) =>
+          c.id === chatId ? { ...c, messages, updatedAt: Date.now() } : c
+        )
+      );
+    },
+    []
+  );
 
   const runStream = useCallback(
     async (chatId: string, history: ChatMessage[], assistantId: string) => {
@@ -169,19 +234,25 @@ export function useChats() {
         });
 
         if (!res.ok || !res.body) {
-          updateMessage(chatId, assistantId, "Something went wrong.");
+          appendToMessage(chatId, assistantId, "Something went wrong.");
           return;
         }
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
+        let full = "";
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           const text = decoder.decode(value, { stream: true });
-          if (text) appendToMessage(chatId, assistantId, text);
+          if (text) {
+            full += text;
+            appendToMessage(chatId, assistantId, text);
+          }
         }
+
+        await updateMessageContent(assistantId, full);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
           appendToMessage(chatId, assistantId, "\n\n*Connection interrupted.*");
@@ -191,7 +262,7 @@ export function useChats() {
         setStreaming(false);
       }
     },
-    [appendToMessage, updateMessage]
+    [appendToMessage, updateMessageContent]
   );
 
   const stopGeneration = useCallback(() => {
@@ -201,9 +272,18 @@ export function useChats() {
   const sendMessage = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
-      if (!trimmed || streaming) return;
+      if (!trimmed || streaming || !userId) return;
 
-      const chatId = activeId ?? newChat();
+      let chatId = activeId;
+      let isNew = false;
+      if (!chatId) {
+        chatId = newChat();
+        isNew = true;
+      } else if (!chats.some((c) => c.id === chatId)) {
+        chatId = newChat();
+        isNew = true;
+      }
+
       const userMsg: ChatMessage = {
         id: uid(),
         role: "user",
@@ -224,9 +304,36 @@ export function useChats() {
       addMessage(chatId, userMsg);
       addMessage(chatId, assistantMsg);
 
+      // Persist chat (if new) then the user message.
+      const title = trimmed.slice(0, 42) || "New chat";
+      if (isNew) {
+        await supabase.from("chats").insert({
+          id: chatId,
+          user_id: userId,
+          title,
+        });
+      } else {
+        await supabase.from("chats").update({ title }).eq("id", chatId).eq(
+          "user_id",
+          userId
+        );
+      }
+      await persistMessage(chatId, userMsg);
+      await persistMessage(chatId, assistantMsg);
+
       await runStream(chatId, history, assistantMsg.id);
     },
-    [activeId, activeChat, streaming, newChat, addMessage, runStream]
+    [
+      activeId,
+      activeChat,
+      chats,
+      streaming,
+      userId,
+      newChat,
+      addMessage,
+      persistMessage,
+      runStream,
+    ]
   );
 
   const regenerate = useCallback(
@@ -246,9 +353,21 @@ export function useChats() {
       };
 
       setMessages(activeChat.id, [...history, newAssistant]);
+
+      // Remove old messages after idx from DB, then insert the new assistant placeholder.
+      await deleteMessagesAfter(activeChat.id, idx);
+      await persistMessage(activeChat.id, newAssistant);
+
       await runStream(activeChat.id, history, newAssistant.id);
     },
-    [activeChat, streaming, setMessages, runStream]
+    [
+      activeChat,
+      streaming,
+      setMessages,
+      deleteMessagesAfter,
+      persistMessage,
+      runStream,
+    ]
   );
 
   const editMessage = useCallback(
@@ -277,16 +396,29 @@ export function useChats() {
       };
 
       setMessages(activeChat.id, [...history, newAssistant]);
+
+      await updateMessageContent(userMsgId, trimmed);
+      await deleteMessagesAfter(activeChat.id, idx + 1);
+      await persistMessage(activeChat.id, newAssistant);
+
       await runStream(activeChat.id, history, newAssistant.id);
     },
-    [activeChat, streaming, setMessages, runStream]
+    [
+      activeChat,
+      streaming,
+      setMessages,
+      updateMessageContent,
+      deleteMessagesAfter,
+      persistMessage,
+      runStream,
+    ]
   );
 
   return {
     chats,
     activeChat,
     activeId,
-    hydrated,
+    loading,
     streaming,
     newChat,
     selectChat,

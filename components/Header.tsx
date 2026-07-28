@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Menu, Moon, Plus, Search } from "lucide-react";
+import { ChevronDown, LogOut, Menu, Moon, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,10 +13,12 @@ export function Header({
   onToggleSidebar,
   onNewChat,
   title,
+  onLogout,
 }: {
   onToggleSidebar: () => void;
   onNewChat: () => void;
   title: string;
+  onLogout: () => void;
 }) {
   return (
     <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5 backdrop-blur-md bg-slate-950/40 z-10 flex-shrink-0">
@@ -80,6 +82,15 @@ export function Header({
           className="hidden md:inline-flex text-slate-400 hover:text-white rounded-full"
         >
           <Moon className="w-5 h-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Log out"
+          onClick={onLogout}
+          className="text-slate-400 hover:text-red-400 rounded-full"
+        >
+          <LogOut className="w-5 h-5" />
         </Button>
         <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-slate-700 to-slate-500 border border-white/10 flex-shrink-0" />
       </div>
