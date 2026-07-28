@@ -2,14 +2,15 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  LayoutGrid,
   MessageSquare,
   Plus,
   Settings,
   Sparkles,
   Trash2,
   X,
+  Search,
 } from "lucide-react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Conversation } from "@/lib/types";
@@ -22,6 +23,7 @@ interface SidebarProps {
   onSelect: (id: string) => void;
   onNew: () => void;
   onDelete: (id: string) => void;
+  onSettings?: () => void;
 }
 
 export function Sidebar({
@@ -32,7 +34,22 @@ export function Sidebar({
   onSelect,
   onNew,
   onDelete,
+  onSettings,
 }: SidebarProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredChats = useMemo(() => {
+    if (!searchQuery.trim()) return chats;
+
+    const query = searchQuery.toLowerCase();
+    return chats.filter(
+      (chat) =>
+        chat.title.toLowerCase().includes(query) ||
+        chat.messages.some((msg) =>
+          msg.content.toLowerCase().includes(query)
+        )
+    );
+  }, [chats, searchQuery]);
   const content = (
     <aside className="relative z-20 flex flex-col border-r border-white/5 bg-black/30 backdrop-blur-3xl h-full w-[280px] max-w-[85vw]">
       <div className="p-4 flex items-center justify-between gap-3">
@@ -65,14 +82,29 @@ export function Sidebar({
         </Button>
       </div>
 
+      <div className="px-3 py-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Search chats..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-slate-200 placeholder:text-slate-600 hover:bg-white/10 focus:outline-none focus:bg-white/10 focus:border-white/20"
+          />
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto phoenix-scroll px-3 py-4 space-y-1">
         <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest px-3 mb-2">
-          Recent
+          {searchQuery ? "Search Results" : "Recent"}
         </div>
-        {chats.length === 0 && (
-          <p className="px-3 text-sm text-slate-600">No conversations yet.</p>
+        {filteredChats.length === 0 && (
+          <p className="px-3 text-sm text-slate-600">
+            {searchQuery ? "No chats found." : "No conversations yet."}
+          </p>
         )}
-        {chats.map((chat) => (
+        {filteredChats.map((chat) => (
           <div
             key={chat.id}
             onClick={() => onSelect(chat.id)}
@@ -101,16 +133,10 @@ export function Sidebar({
         ))}
       </div>
 
-      <div className="p-3 border-t border-white/5 space-y-1">
+      <div className="p-3 border-t border-white/5">
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 text-slate-400 hover:text-white rounded-lg"
-        >
-          <LayoutGrid className="w-4 h-4" />
-          <span className="text-sm">Explore GPTs</span>
-        </Button>
-        <Button
-          variant="ghost"
+          onClick={onSettings}
           className="w-full justify-start gap-3 text-slate-400 hover:text-white rounded-lg"
         >
           <Settings className="w-4 h-4" />

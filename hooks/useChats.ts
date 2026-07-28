@@ -187,6 +187,21 @@ export function useChats(userId: string | null) {
     []
   );
 
+  const generateTitleFromMessage = (content: string): string => {
+    // Extract first sentence or first 50 chars
+    const trimmed = content.trim();
+    if (!trimmed) return "New chat";
+    
+    // Find first sentence (ends with . ! or ?)
+    const sentenceMatch = trimmed.match(/^[^.!?]*[.!?]/);
+    if (sentenceMatch) {
+      return sentenceMatch[0].slice(0, 60);
+    }
+    
+    // Otherwise use first 60 chars
+    return trimmed.slice(0, 60);
+  };
+
   const addMessage = useCallback(
     (chatId: string, message: ChatMessage) => {
       setChats((prev) =>
@@ -197,7 +212,7 @@ export function useChats(userId: string | null) {
           return {
             ...c,
             title: isFirstUser
-              ? message.content.slice(0, 42) || "New chat"
+              ? generateTitleFromMessage(message.content)
               : c.title,
             messages: [...c.messages, message],
             updatedAt: Date.now(),
@@ -305,7 +320,7 @@ export function useChats(userId: string | null) {
       addMessage(chatId, assistantMsg);
 
       // Persist chat (if new) then the user message.
-      const title = trimmed.slice(0, 42) || "New chat";
+      const title = generateTitleFromMessage(trimmed);
       if (isNew) {
         await supabase.from("chats").insert({
           id: chatId,

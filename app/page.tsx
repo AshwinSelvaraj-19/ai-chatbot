@@ -7,13 +7,18 @@ import { Header } from "@/components/Header";
 import { Chat } from "@/components/Chat";
 import { ChatInput } from "@/components/ChatInput";
 import { EmptyState } from "@/components/EmptyState";
+import { SettingsModal } from "@/components/SettingsModal";
+import { ThemeStudio } from "@/components/ThemeStudio";
 import { useChats } from "@/hooks/useChats";
 import { supabase } from "@/lib/supabase";
 
 export default function PhoenixPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [themeStudioOpen, setThemeStudioOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -25,6 +30,7 @@ export default function PhoenixPage() {
         return;
       }
       setUserId(data.session.user.id);
+      setUserEmail(data.session.user.email || null);
       setAuthChecked(true);
     })();
 
@@ -69,6 +75,13 @@ export default function PhoenixPage() {
     router.replace("/login");
   };
 
+  const handleClearHistory = async () => {
+    if (!userId) return;
+    await supabase.from("chats").delete().eq("user_id", userId);
+    // Reload the page to refresh chats
+    window.location.reload();
+  };
+
   if (!authChecked) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-950">
@@ -105,6 +118,7 @@ export default function PhoenixPage() {
           setSidebarOpen(false);
         }}
         onDelete={deleteChat}
+        onSettings={() => setSettingsOpen(true)}
       />
 
       <main className="flex-1 relative flex flex-col z-10 min-w-0">
@@ -113,6 +127,9 @@ export default function PhoenixPage() {
           onNewChat={() => newChat()}
           title={activeChat?.title ?? "New chat"}
           onLogout={handleLogout}
+          onThemeStudio={() => setThemeStudioOpen(true)}
+          onSettings={() => setSettingsOpen(true)}
+          userEmail={userEmail || undefined}
         />
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
@@ -135,6 +152,20 @@ export default function PhoenixPage() {
           onStop={stopGeneration}
         />
       </main>
+
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onLogout={handleLogout}
+        onClearHistory={handleClearHistory}
+        chats={chats}
+        userEmail={userEmail || undefined}
+      />
+
+      <ThemeStudio
+        isOpen={themeStudioOpen}
+        onClose={() => setThemeStudioOpen(false)}
+      />
     </div>
   );
 }
