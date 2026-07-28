@@ -14,11 +14,14 @@ export default function PhoenixPage() {
     activeChat,
     activeId,
     hydrated,
-    loading,
+    streaming,
     newChat,
     selectChat,
     deleteChat,
     sendMessage,
+    stopGeneration,
+    regenerate,
+    editMessage,
   } = useChats();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,6 +32,11 @@ export default function PhoenixPage() {
   };
 
   const showEmpty = !activeChat || activeChat.messages.length === 0;
+
+  const streamingId =
+    activeChat && streaming
+      ? activeChat.messages[activeChat.messages.length - 1]?.id ?? null
+      : null;
 
   return (
     <div className="flex h-screen w-full bg-slate-950 text-slate-200 overflow-hidden">
@@ -62,9 +70,19 @@ export default function PhoenixPage() {
         {hydrated && showEmpty ? (
           <EmptyState onPick={handleSend} />
         ) : (
-          <Chat messages={activeChat?.messages ?? []} loading={loading} />
+          <Chat
+            messages={activeChat?.messages ?? []}
+            streaming={streaming}
+            streamingId={streamingId}
+            onRegenerate={regenerate}
+            onEdit={editMessage}
+          />
         )}
-        <ChatInput onSend={handleSend} loading={loading} />
+        <ChatInput
+          onSend={handleSend}
+          streaming={streaming}
+          onStop={stopGeneration}
+        />
       </main>
     </div>
   );

@@ -1,16 +1,56 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Sparkles, User } from "lucide-react";
+import { Check, Copy, Pencil, RefreshCw, Sparkles, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/lib/types";
 import { TypingIndicator } from "./TypingIndicator";
+import { CodeBlock } from "./CodeBlock";
 
-export function Message({ message }: { message: ChatMessage }) {
+interface MessageProps {
+  message: ChatMessage;
+  isStreaming?: boolean;
+  onRegenerate?: (assistantId: string) => void;
+  onEdit?: (userMsgId: string, newText: string) => void;
+}
+
+export function Message({
+  message,
+  isStreaming = false,
+  onRegenerate,
+  onEdit,
+}: MessageProps) {
   const isUser = message.role === "user";
-  const isWaiting = !isUser && message.content.trim() === "";
+  const isWaiting = !isUser && message.content.trim() === "" && isStreaming;
+
+  const [copied, setCopied] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(message.content);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  };
+
+  const submitEdit = () => {
+    const trimmed = draft.trim();
+    if (!trimmed || !onEdit) return;
+    onEdit(message.id, trimmed);
+    setEditing(false);
+  };
+
+  const cancelEdit = () => {
+    setDraft(message.content);
+    setEditing(false);
+  };
 
   return (
     <motion.div
@@ -18,7 +58,7 @@ export function Message({ message }: { message: ChatMessage }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "flex w-full gap-3 md:gap-4",
+        "group/msg flex w-full gap-3 md:gap-4",
         isUser ? "justify-end" : "justify-start"
       )}
     >
@@ -31,25 +71,125 @@ export function Message({ message }: { message: ChatMessage }) {
       <div className={cn("max-w-[85%] md:max-w-[75%]", isUser && "order-2")}>
         {isWaiting ? (
           <TypingIndicator />
+        ) : editing && isUser ? (
+          <div className="rounded-2xl bg-indigo-600/20 border border-indigo-500/30 p-3">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              autoFocus
+              rows={Math.min(Math.max(draft.split("\n").length, 1), 10)}
+              className="w-full bg-transparent text-white text-sm leading-relaxed resize-none outline-none min-h-[40px] max-h-[240px] overflow-y-auto phoenix-scroll"
+            />
+            <div className="flex justify-end gap-2 mt-2">
+              <button
+                onClick={cancelEdit}
+                className="px-3 py-1 text-xs text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitEdit}
+                className="px-3 py-1 text-xs font-medium bg-white text-black rounded-lg hover:bg-slate-200 transition-colors"
+              >
+                Send
+              </button>
+            </div>
+          </div>
         ) : (
-          <div
-            className={cn(
-              "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
-              isUser
-                ? "bg-indigo-600 text-white rounded-br-md"
-                : "bg-white/5 border border-white/10 text-slate-200 rounded-bl-md"
-            )}
-          >
-            {isUser ? (
-              <p className="whitespace-pre-wrap break-words">{message.content}</p>
-            ) : (
-              <div className="prose-chat">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <>
+            <div
+              className={cn(
+                "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
+                isUser
+                  ? "bg-indigo-600 text-white rounded-br-md"
+                  : "bg-white/5 border border-white/10 text-slate-200 rounded-bl-md"
+              )}
+            >
+              {isUser ? (
+                <p className="whitespace-pre-wrap break-words">
                   {message.content}
-                </ReactMarkdown>
+                </p>
+              ) : (
+                <div className="prose-chat">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      code({ className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        const value = String(children).replace(/\n$/, "");
+                        if (match) {
+                          return (
+                            <CodeBlock
+                              language={match[1]}
+                              value={value}
+                            />
+                          );
+                        }
+                        return (
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                  {isStreaming && (
+                    <span className="inline-block w-1.5 h-4 ml-0.5 bg-slate-300 animate-pulse align-middle rounded-sm" />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {!isStreaming && (
+              <div
+                className={cn(
+                  "flex items-center gap-1 mt-1.5 opacity-0 group-hover/msg:opacity-100 transition-opacity",
+                  isUser ? "justify-end" : "justify-start"
+                )}
+              >
+                {isUser ? (
+                  <button
+                    onClick={() => {
+                      setDraft(message.content);
+                      setEditing(true);
+                    }}
+                    aria-label="Edit message"
+                    className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-1.5 py-0.5 rounded-md hover:bg-white/5 transition-colors"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    Edit
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleCopy}
+                      aria-label="Copy response"
+                      className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-1.5 py-0.5 rounded-md hover:bg-white/5 transition-colors"
+                    >
+                      {copied ? (
+                        <Check className="w-3 h-3 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-3 h-3" />
+                      )}
+                      {copied ? "Copied" : "Copy"}
+                    </button>
+                    {onRegenerate && (
+                      <button
+                        onClick={() => onRegenerate(message.id)}
+                        aria-label="Regenerate response"
+                        className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 px-1.5 py-0.5 rounded-md hover:bg-white/5 transition-colors"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        Regenerate
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
 
