@@ -72,7 +72,13 @@ export function Message({
         {isWaiting ? (
           <TypingIndicator />
         ) : editing && isUser ? (
-          <div className="rounded-2xl bg-indigo-600/20 border border-indigo-500/30 p-3">
+          <div
+            className="rounded-2xl p-3 border"
+            style={{
+              backgroundColor: `rgba(var(--color-primary-rgb), 0.2)`,
+              borderColor: `rgba(var(--color-primary-rgb), 0.3)`,
+            }}
+          >
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -99,11 +105,16 @@ export function Message({
           <>
             <div
               className={cn(
-                "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
-                isUser
-                  ? "bg-indigo-600 text-white rounded-br-md"
-                  : "bg-white/5 border border-white/10 text-slate-200 rounded-bl-md"
+                "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm text-white",
+                isUser ? "rounded-br-md" : "rounded-bl-md border border-white/10 text-slate-200"
               )}
+              style={
+                isUser
+                  ? { backgroundColor: `var(--color-primary)` }
+                  : {
+                      backgroundColor: `rgba(255, 255, 255, 0.05)`,
+                    }
+              }
             >
               {isUser ? (
                 <p className="whitespace-pre-wrap break-words">

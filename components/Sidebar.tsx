@@ -51,7 +51,13 @@ export function Sidebar({
     );
   }, [chats, searchQuery]);
   const content = (
-    <aside className="relative z-20 flex flex-col border-r border-white/5 bg-black/30 backdrop-blur-3xl h-full w-[280px] max-w-[85vw]">
+    <aside
+      className="relative z-20 flex flex-col backdrop-blur-3xl h-full w-[280px] max-w-[85vw]"
+      style={{
+        backgroundColor: `rgba(var(--color-sidebar-rgb), 0.3)`,
+        borderRight: `1px solid rgba(255, 255, 255, 0.05)`,
+      }}
+    >
       <div className="p-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 flex-shrink-0">

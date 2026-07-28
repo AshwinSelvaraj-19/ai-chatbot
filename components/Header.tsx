@@ -36,7 +36,13 @@ export function Header({
         .slice(0, 2)
     : "U";
   return (
-    <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5 backdrop-blur-md bg-slate-950/40 z-10 flex-shrink-0">
+    <header
+      className="h-16 flex items-center justify-between px-4 md:px-6 backdrop-blur-md z-10 flex-shrink-0"
+      style={{
+        backgroundColor: `rgba(var(--color-background-rgb), 0.4)`,
+        borderBottom: `1px solid rgba(255, 255, 255, 0.05)`,
+      }}
+    >
       <div className="flex items-center gap-2 min-w-0">
         <Button
           variant="ghost"
@@ -47,11 +53,17 @@ export function Header({
           <Menu className="w-5 h-5" />
         </Button>
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-slate-200 hover:bg-white/5 font-semibold outline-none">
+          <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-slate-200 font-semibold outline-none transition-colors hover:bg-white/5">
             Phoenix 4.0
             <ChevronDown className="w-4 h-4 opacity-50" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-slate-900 border-white/10 text-slate-200 min-w-48 p-1">
+          <DropdownMenuContent
+            className="text-slate-200 min-w-48 p-1"
+            style={{
+              backgroundColor: `rgba(var(--color-sidebar-rgb), 0.95)`,
+              borderColor: `rgba(255, 255, 255, 0.1)`,
+            }}
+          >
             <DropdownMenuItem className="focus:bg-white/5 cursor-pointer rounded-lg p-3">
               <div className="flex flex-col">
                 <span className="font-medium">Phoenix 4.0</span>
@@ -93,10 +105,19 @@ export function Header({
           <Palette className="w-5 h-5" />
         </Button>
         <DropdownMenu>
-          <DropdownMenuTrigger className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-fuchsia-500 border border-white/10 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs hover:opacity-80 transition-opacity cursor-pointer">
+          <DropdownMenuTrigger
+            className="h-8 w-8 rounded-full border border-white/10 flex-shrink-0 flex items-center justify-center text-white font-semibold text-xs hover:opacity-80 transition-opacity cursor-pointer"
+            style={{ backgroundColor: `var(--color-primary)` }}
+          >
             {userInitials}
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-slate-900 border-white/10 text-slate-200 min-w-40 p-1">
+          <DropdownMenuContent
+            className="text-slate-200 min-w-40 p-1"
+            style={{
+              backgroundColor: `rgba(var(--color-sidebar-rgb), 0.95)`,
+              borderColor: `rgba(255, 255, 255, 0.1)`,
+            }}
+          >
             <DropdownMenuItem
               onClick={onSettings}
               className="focus:bg-white/5 cursor-pointer rounded-lg p-3"
