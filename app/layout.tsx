@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Phoenix AI",
+  title: " Mind Make AI",
   description: "Advanced AI chat application",
 };
 
