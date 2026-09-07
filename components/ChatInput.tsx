@@ -72,7 +72,7 @@ export function ChatInput({ onSend, streaming, onStop }: ChatInputProps) {
                 submit();
               }
             }}
-            placeholder="Message Phoenix AI..."
+            placeholder="Message  Mind Make AI..."
             rows={1}
             style={{ height: MIN_HEIGHT, lineHeight: `${LINE_HEIGHT}px` }}
             className="w-full bg-transparent border-0 focus:outline-none text-slate-200 placeholder:text-slate-500 pt-4 pb-2 px-6 resize-none text-base phoenix-scroll"
