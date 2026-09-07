@@ -46,7 +46,7 @@ export default function LoginPage() {
             Welcome back
           </h1>
           <p className="text-slate-400 mt-2 text-sm">
-            Sign in to continue to Phoenix AI
+            Sign in to continue to  Mind Make AI
           </p>
         </div>
 
