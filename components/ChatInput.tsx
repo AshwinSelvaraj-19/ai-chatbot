@@ -132,7 +132,7 @@ export function ChatInput({ onSend, streaming, onStop }: ChatInputProps) {
           </div>
         </div>
         <p className="text-center text-[11px] text-slate-600 mt-4 tracking-wide uppercase">
-          Phoenix AI may provide inaccurate info. Check important facts.
+          MindMake AI may provide inaccurate info. Check important facts.
         </p>
       </div>
     </div>
