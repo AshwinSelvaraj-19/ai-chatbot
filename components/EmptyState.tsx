@@ -25,7 +25,7 @@ export function EmptyState({ onPick }: { onPick: (text: string) => void }) {
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
           How can{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-fuchsia-400">
-            Phoenix
+           MindMake 
           </span>{" "}
           help today?
         </h2>
