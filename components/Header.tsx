@@ -56,7 +56,7 @@ export function Header({
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-slate-200 font-semibold outline-none transition-all duration-200 hover:bg-white/5 active:scale-95">
-            Phoenix 4.0
+            MindMake AI 4.0
             <ChevronDown className="w-4 h-4 opacity-50 transition-transform duration-200" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
