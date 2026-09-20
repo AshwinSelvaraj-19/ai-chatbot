@@ -53,7 +53,7 @@ export default function SignupPage() {
             Create account
           </h1>
           <p className="text-slate-400 mt-2 text-sm">
-            Sign up to start chatting with Phoenix AI
+            Sign up to start chatting with MindMake AI
           </p>
         </div>
 
