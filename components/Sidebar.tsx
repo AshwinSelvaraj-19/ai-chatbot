@@ -65,7 +65,7 @@ export function Sidebar({
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <span className="font-bold text-lg tracking-tight text-white truncate">
-            Phoenix AI
+            MindMake AI
           </span>
         </div>
         <Button
