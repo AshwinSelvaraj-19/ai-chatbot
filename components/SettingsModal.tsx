@@ -180,7 +180,7 @@ export function SettingsModal({
             {/* About Section */}
             <div className="bg-slate-800/50 p-4 rounded-lg">
               <h3 className="text-sm font-semibold text-white mb-2">
-                About Phoenix AI
+                About MindMake AI
               </h3>
               <p className="text-xs text-slate-400 mb-3">
                 Phoenix AI is a powerful chatbot powered by Google Gemini API.
