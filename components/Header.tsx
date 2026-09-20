@@ -76,7 +76,7 @@ export function Header({
             </DropdownMenuItem>
             <DropdownMenuItem className="focus:bg-white/5 cursor-pointer rounded-lg p-3">
               <div className="flex flex-col">
-                <span className="font-medium">Phoenix Lite</span>
+                <span className="font-medium">MindMake Lite</span>
                 <span className="text-xs text-slate-500">
                   Fast and lightweight for daily tasks
                 </span>
