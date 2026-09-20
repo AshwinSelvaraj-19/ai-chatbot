@@ -188,7 +188,7 @@ export function SettingsModal({
               </p>
               <div className="text-xs text-slate-500">
                 <p>Version: 4.0</p>
-                <p>© 2024 Phoenix AI. All rights reserved.</p>
+                <p>© 2026 MindMake AI. All rights reserved.</p>
               </div>
             </div>
 
