@@ -32,7 +32,7 @@ export function SettingsModal({
   userEmail,
 }: SettingsModalProps) {
   const [themeStudioOpen, setThemeStudioOpen] = useState(false);
-  const [displayName, setDisplayName] = useState("Phoenix User");
+  const [displayName, setDisplayName] = useState("User");
 
   const handleExportChats = () => {
     const content = chats
