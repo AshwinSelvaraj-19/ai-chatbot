@@ -183,7 +183,7 @@ export function SettingsModal({
                 About MindMake AI
               </h3>
               <p className="text-xs text-slate-400 mb-3">
-                Phoenix AI is a powerful chatbot powered by Google Gemini API.
+                MindMake AI is a powerful chatbot powered by Google Gemini API.
                 All conversations are securely stored in the cloud.
               </p>
               <div className="text-xs text-slate-500">
